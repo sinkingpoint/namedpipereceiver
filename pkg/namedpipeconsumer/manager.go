@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"syscall"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/operator"
 	"go.uber.org/multierr"
@@ -34,9 +35,19 @@ func (m *Manager) Start(persister operator.Persister) error {
 	var readerErr error
 
 	for i := range m.paths {
-		file, err := os.OpenFile(m.paths[i], os.O_RDONLY, os.ModeNamedPipe)
+		path := m.paths[i]
+
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			if err := syscall.Mkfifo(path, 0666); err != nil {
+				readerErr = multierr.Append(err, fmt.Errorf("failed to create pipe %q: %w", m.paths[i], err))
+				continue
+			}
+		}
+
+		file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, os.ModeNamedPipe)
 		if err != nil {
 			readerErr = multierr.Append(err, fmt.Errorf("failed to open file %q: %w", m.paths[i], err))
+			continue
 		}
 
 		m.readers[i], err = m.readerFactory.newReader(file)
@@ -62,6 +73,7 @@ func (m *Manager) startPipe(ctx context.Context, reader *reader) {
 	m.wg.Add(1)
 	go func() {
 		defer m.wg.Done()
+
 		if err := reader.Run(ctx); err != nil {
 			m.Errorf("failed to run reader: %w", err)
 			m.cancel()

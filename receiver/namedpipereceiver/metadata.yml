@@ -1,0 +1,6 @@
+type: namedpipe
+
+status:
+  class: receiver
+  stability:
+    beta: [logs]

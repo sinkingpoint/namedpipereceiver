@@ -17,7 +17,7 @@ import (
 const defaultEncoding = "utf-8"
 
 type Config struct {
-	Path        string          `mapstructure:"path"`
+	Paths       []string        `mapstructure:"paths"`
 	Encoding    string          `mapstructure:"encoding,omitempty"`
 	SplitConfig split.Config    `mapstructure:"multiline,omitempty"`
 	MaxLogSize  helper.ByteSize `mapstructure:"max_log_size,omitempty"`
@@ -49,6 +49,7 @@ func (c Config) buildManager(logger *zap.SugaredLogger, emit emit.Callback, fact
 
 	return &Manager{
 		SugaredLogger: logger.With("component", "namedpipeconsumer"),
+		paths:         c.Paths,
 		readerFactory: &readerFactory{
 			SugaredLogger:   logger.With("component", "namedpipeconsumer"),
 			readerConfig:    &readerConfig{emit: emit},
