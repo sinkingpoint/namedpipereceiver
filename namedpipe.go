@@ -3,8 +3,8 @@ package namedpipereceiver
 import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/adapter"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/stanza/operator"
+	"github.com/sinkingpoint/namedpipereceiver/internal/metadata"
 	"github.com/sinkingpoint/namedpipereceiver/pkg/operator/input/namedpipe"
-	"github.com/sinkingpoint/namedpipereceiver/receiver/namedpipereceiver/internal/metadata"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/receiver"
 )
